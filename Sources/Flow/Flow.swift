@@ -1,38 +1,46 @@
 import Foundation
 import Combine
 
-protocol FlowAction {}
+public protocol FlowAction {}
 
-protocol FlowState {}
+public protocol FlowState {}
 
-struct Command<Action: FlowAction> {
-    let execute: (SendFunction<Action>) -> Void
+public struct Command<Action: FlowAction> {
+    public let execute: (SendFunction<Action>) -> Void
+    
+    public init(_ execute: @escaping (SendFunction<Action>) -> Void) {
+        self.execute = execute
+    }
 }
 
-struct Reducer<State: FlowState, Action: FlowAction> {
+public struct Reducer<State: FlowState, Action: FlowAction> {
     let reduce: (inout State, Action) -> [Command<Action>]?
+    
+    public init(_ reduce: @escaping (inout State, Action) -> [Command<Action>]?) {
+        self.reduce = reduce
+    }
 }
 
-typealias SendFunction<Action: FlowAction> = (Action) -> ()
+public typealias SendFunction<Action: FlowAction> = (Action) -> ()
 
-typealias Middleware<State: FlowState, Action: FlowAction> = (@escaping SendFunction<Action>, @escaping () -> State?) -> (@escaping SendFunction<Action>) -> SendFunction<Action>
+public typealias Middleware<State: FlowState, Action: FlowAction> = (@escaping SendFunction<Action>, @escaping () -> State?) -> (@escaping SendFunction<Action>) -> SendFunction<Action>
 
-final class Store<State: FlowState, Action: FlowAction>: ObservableObject {
-    @Published private(set) var state: State
+public final class Store<State: FlowState, Action: FlowAction>: ObservableObject {
+    @Published public private(set) var state: State
     
     private(set) var isSending = false
     
     private let reducer: Reducer<State, Action>
     private var sendFunction: SendFunction<Action>!
 
-    init(initialState: State, initialAction: Action, reducer: Reducer<State, Action>, middleware: [Middleware<State, Action>] = []) {
+    public init(initialState: State, initialAction: Action, reducer: Reducer<State, Action>, middleware: [Middleware<State, Action>] = []) {
         self.state = initialState
         self.reducer = reducer
         self.sendFunction = buildSendFunction(middleware)
         send(initialAction)
     }
     
-    func send(_ action: Action) {
+    public func send(_ action: Action) {
         sendFunction(action)
     }
     

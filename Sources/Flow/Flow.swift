@@ -6,9 +6,9 @@ public protocol FlowAction {}
 public protocol FlowState {}
 
 public struct Command<Action: FlowAction> {
-    public let execute: (SendFunction<Action>) -> Void
+    public let execute: (@escaping SendFunction<Action>) -> Void
     
-    public init(_ execute: @escaping (SendFunction<Action>) -> Void) {
+    public init(_ execute: @escaping (@escaping SendFunction<Action>) -> Void) {
         self.execute = execute
     }
 }
